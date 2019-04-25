@@ -1,8 +1,22 @@
 from data import get_data, split_data
 from model import CNN
 from keras.utils.np_utils import to_categorical
+from keras import layers
+from keras.models import Model
+from sklearn.ensemble import RandomForestClassifier
 
 import numpy as np
+
+
+def ensembleModels(models, model_input):
+    # collect outputs of models in a list
+    yModels = [model(model_input) for model in models]
+    # averaging outputs
+    yAvg = layers.average(yModels)
+    # build model from same input and avg output
+    modelEns = Model(inputs=model_input, outputs=yAvg, name='ensemble')
+
+    return modelEns
 
 
 def main(config):
@@ -21,11 +35,13 @@ def main(config):
     Y_test = to_categorical(Y_test)
 
     # instantiate the CNN model and train on the data
-    model = CNN(num_features, Y_train.shape[1])
-    model.fit(X_train, Y_train, batch_size=25, epochs=500, verbose=2)
+    cnn_model = CNN(num_features, Y_train.shape[1])
+    rfc_model = RandomForestClassifier(n_estimators=100, max_depth=2, random_state=0)
+
+    ensemble_model = ensembleModels([cnn_model, rfc_model], [X_train_cnn, X_train_rfc])
 
     # Evaluate the trained model on test data and print the accuracy
-    score = model.model.evaluate(X_test, Y_test, batch_size=100)
+    score = ensemble_model.evaluate(X_test, Y_test, batch_size=100)
     print("\nTest accuracy: ", round(score[1]*100, 2))
     print("Test loss: ", round(score[0], 2))
 
