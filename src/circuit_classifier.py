@@ -22,18 +22,30 @@ def main(config):
 
     # instantiate the CNN model and train on the data
     model = CNN(num_features, Y_train.shape[1])
-    model.fit(X_train, Y_train, batch_size=25, epochs=500, verbose=2)
+    model.fit(X_train, Y_train, batch_size=50, epochs=500, verbose=2)
 
     # Evaluate the trained model on test data and print the accuracy
-    score = model.model.evaluate(X_test, Y_test, batch_size=100)
+    score = model.model.evaluate(X_test, Y_test)
     print("\nTest accuracy: ", round(score[1]*100, 2))
     print("Test loss: ", round(score[0], 2))
 
 
 if __name__ == '__main__':
+    # config = {
+    #     "raw_data": "../hswf/client/",
+    #     "num_websites": 50,
+    #     "num_instances": 50,
+    # }
+
+    # config = {
+    #     "raw_data": "data/defended/client/tamaraw_0501_1207/",
+    #     "num_websites": 50,
+    #     "num_instances": 50,
+    # }
+
     config = {
-        "raw_data": "../hswf/client/",
+        "raw_data": "data/client/",
         "num_websites": 50,
-        "num_instances": 50,
+        "num_instances": 10,
     }
     main(config)
