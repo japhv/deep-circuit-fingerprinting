@@ -105,3 +105,9 @@ venv.bak/
 
 # Pycharm settings
 .idea
+
+# data source 
+data/
+
+# graph
+graph/
