@@ -108,6 +108,7 @@ venv.bak/
 
 # data source 
 data/
+data.zip
 
 # graph
 graph/
