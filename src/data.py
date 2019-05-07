@@ -1,6 +1,12 @@
+"""
+author: Toboure Gambo
+author: Japheth Adhavan
+
+This file holds the data reading and processing functions. A lot of code here has been reused from
+the Website fingerprinting homework.
+"""
 import numpy as np
 from sklearn.utils import shuffle
-import os
 
 def get_data(config: dict) -> np.array:
     """
@@ -22,7 +28,7 @@ def get_data(config: dict) -> np.array:
     num_sites = int(config.get('num_websites'))    # 95
     num_instances = int(config.get('num_instances'))   # 100
     file_ext = config.get('file_extension', "")   # No extension
-    max_length = 500    # maximum number of packet directions to use
+    max_length = 3000    # maximum number of packet directions to use
 
     # read data from files
     print("loading data...")

@@ -1,11 +1,39 @@
+"""
+author: Toboure Gambo
+author: Japheth Adhavan
+
+This is the main classifier file. A lot of code here has been reused from
+the Website fingerprinting homework.
+"""
+import keras
 from data import get_data, split_data
-from model import CNN
+from model import CNNModel, RNNModel, DFNet_Undefended, DFNet_WTFPAD, AllCNN
 from keras.utils.np_utils import to_categorical
+from visualize import plot_accuracy
 
+#######################################################################################################################
+# Seed values so that we get reproducible results
+# Apparently you may use different seed values at each stage
+seed_value= 503
+
+# 1. Set `PYTHONHASHSEED` environment variable at a fixed value
+import os
+os.environ['PYTHONHASHSEED']=str(seed_value)
+
+# 2. Set `python` built-in pseudo-random generator at a fixed value
+import random
+random.seed(seed_value)
+
+# 3. Set `numpy` pseudo-random generator at a fixed value
 import numpy as np
+np.random.seed(seed_value)
 
+# 4. Set `tensorflow` pseudo-random generator at a fixed value
+import tensorflow as tf
+tf.set_random_seed(seed_value)
+#######################################################################################################################
 
-def main(config):
+def train(config, Model):
 
     # Load the data and create X and Y matrices
     data = get_data(config)
@@ -21,31 +49,45 @@ def main(config):
     Y_test = to_categorical(Y_test)
 
     # instantiate the CNN model and train on the data
-    model = CNN(num_features, Y_train.shape[1])
-    model.fit(X_train, Y_train, batch_size=50, epochs=500, verbose=2)
+    model = Model(num_features, Y_train.shape[1])
+    history = model.fit(X_train, Y_train, batch_size=128, epochs=100, verbose=2)
 
     # Evaluate the trained model on test data and print the accuracy
     score = model.model.evaluate(X_test, Y_test)
     print("\nTest accuracy: ", round(score[1]*100, 2))
     print("Test loss: ", round(score[0], 2))
 
+    return history
 
-if __name__ == '__main__':
-    # config = {
-    #     "raw_data": "../hswf/client/",
-    #     "num_websites": 50,
-    #     "num_instances": 50,
-    # }
+#######################################################################################################################
 
-    # config = {
-    #     "raw_data": "data/defended/client/tamaraw_0501_1207/",
-    #     "num_websites": 50,
-    #     "num_instances": 50,
-    # }
-
+def plot_model_accuracy(Model, model_name):
     config = {
-        "raw_data": "data/client/",
         "num_websites": 50,
         "num_instances": 10,
     }
-    main(config)
+
+    results = {}
+
+    config["raw_data"] = "./data/undefended/client/"
+    results["Undefended"] = train(config, Model).history["acc"]
+    keras.backend.clear_session()
+
+    config["raw_data"] = "./data/defended/client/wtf-pad/"
+    results["WTF-PAD"] = train(config, Model).history["acc"]
+    keras.backend.clear_session()
+    config["raw_data"] = "./data/defended/client/tamaraw/"
+    results["TAMARAW"] = train(config, Model).history["acc"]
+    keras.backend.clear_session()
+
+    plot_accuracy(model_name, results)
+
+#######################################################################################################################
+
+if __name__ == '__main__':
+    models_to_train = [(CNNModel, "CNN"), (RNNModel, "RNN"), (AllCNN, "All-CNN")]
+
+    for Model, name in models_to_train:
+        plot_model_accuracy(Model, name)
+
+#######################################################################################################################

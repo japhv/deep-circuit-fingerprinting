@@ -106,9 +106,7 @@ venv.bak/
 # Pycharm settings
 .idea
 
-# data source 
-data/
-data.zip
-
-# graph
-graph/
+# Project-level folders
+./plots
+./graph
+./data
